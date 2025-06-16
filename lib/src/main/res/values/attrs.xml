@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <declare-styleable name="DoraTableView">
+        <!-- 0 = 垂直滚动（默认），1 = 水平滚动 -->
+        <attr name="dview_tv_orientation" format="enum">
+            <enum name="vertical" value="0"/>
+            <enum name="horizontal" value="1"/>
+        </attr>
+        <!-- 垂直时表示列数，水平时表示行数 -->
+        <attr name="dview_tv_spanCount" format="integer"/>
+        <attr name="dview_tv_dividerColor" format="color"/>
+        <attr name="dview_tv_dividerSize" format="dimension"/>
+    </declare-styleable>
+</resources>
