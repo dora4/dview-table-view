@@ -2,6 +2,9 @@ dview-table-view
 ![Release](https://jitpack.io/v/dora4/dview-table-view.svg)
 --------------------------------
 
+#### 卡片
+![DORA视图 古老的石板](https://github.com/user-attachments/assets/b5094707-759e-4cd3-9275-f8c9859adf31)
+
 #### Gradle依赖配置
 
 ```groovy
