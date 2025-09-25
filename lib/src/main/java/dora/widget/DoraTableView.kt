@@ -148,34 +148,34 @@ class DoraTableView @JvmOverloads constructor(
             outRect: Rect,
             view: View,
             parent: RecyclerView,
-            state: State
+            state: RecyclerView.State
         ) {
-            outRect.set(dividerSize, dividerSize, 0, 0)
+            val position = (view.layoutParams as LayoutParams).viewAdapterPosition
+            val column = position % spanCount
+            // 只给右边和下边留出分割线空间
+            outRect.right = if (column < spanCount - 1) dividerSize else 0
+            outRect.bottom = dividerSize
         }
 
-        override fun onDraw(canvas: Canvas, parent: RecyclerView, state: State) {
+        override fun onDraw(canvas: Canvas, parent: RecyclerView, state: RecyclerView.State) {
             val childCount = parent.childCount
             for (i in 0 until childCount) {
                 val child = parent.getChildAt(i)
-                val params = child.layoutParams as RecyclerView.LayoutParams
-                val left = child.left - params.leftMargin - dividerSize
-                val top = child.top - params.topMargin - dividerSize
-                val right = child.right + params.rightMargin
-                val bottom = child.bottom + params.bottomMargin
-                canvas.drawRect(
-                    left.toFloat(),
-                    top.toFloat(),
-                    right.toFloat(),
-                    (top + dividerSize).toFloat(),
-                    paint
-                )
-                canvas.drawRect(
-                    left.toFloat(),
-                    top.toFloat(),
-                    (left + dividerSize).toFloat(),
-                    bottom.toFloat(),
-                    paint
-                )
+                val params = child.layoutParams as LayoutParams
+
+                // 画竖线（右边）
+                val leftV = child.right + params.rightMargin
+                val rightV = leftV + dividerSize
+                val topV = child.top - params.topMargin
+                val bottomV = child.bottom + params.bottomMargin + dividerSize
+                canvas.drawRect(leftV.toFloat(), topV.toFloat(), rightV.toFloat(), bottomV.toFloat(), paint)
+
+                // 画横线（下边）
+                val leftH = child.left - params.leftMargin
+                val rightH = child.right + params.rightMargin + dividerSize
+                val topH = child.bottom + params.bottomMargin
+                val bottomH = topH + dividerSize
+                canvas.drawRect(leftH.toFloat(), topH.toFloat(), rightH.toFloat(), bottomH.toFloat(), paint)
             }
         }
     }
