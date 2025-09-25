@@ -37,7 +37,7 @@ class DoraTableView @JvmOverloads constructor(
     init {
         attrs?.let {
             val ta: TypedArray = context.obtainStyledAttributes(it, R.styleable.DoraTableView)
-            orientationMode = ta.getInt(R.styleable.DoraTableView_dview_tv_orientation, VERTICAL)
+            orientationMode = ta.getInt(R.styleable.DoraTableView_dview_tv_orientation, orientationMode)
             manualSpanCount = ta.getInt(R.styleable.DoraTableView_dview_tv_spanCount, 0)
             dividerColor = ta.getColor(
                 R.styleable.DoraTableView_dview_tv_dividerColor,
