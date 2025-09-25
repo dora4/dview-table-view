@@ -104,7 +104,7 @@ class DoraTableView @JvmOverloads constructor(
             val tv = TextView(parent.context).apply {
                 layoutParams = LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
+                    ViewGroup.LayoutParams.WRAP_CONTENT
                 )
                 gravity = Gravity.CENTER
             }
