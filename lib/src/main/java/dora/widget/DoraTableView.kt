@@ -59,19 +59,18 @@ class DoraTableView @JvmOverloads constructor(
      * @param data 二维列表：List<行, List<TableCell>>
      */
     fun setData(data: List<List<TableCell>>) {
-        val spanCount = if (manualSpanCount > 0) manualSpanCount else
-            if (orientationMode == VERTICAL) data.maxOfOrNull { it.size } ?: 1 else data.size.coerceAtLeast(1)
+        val spanCount = if (manualSpanCount > 0) {
+            manualSpanCount
+        } else {
+            data.maxOfOrNull { it.size } ?: 1  // 不论横向竖向，spanCount 始终是一行多少列
+        }
         layoutManager = GridLayoutManager(context, spanCount, orientationMode, false)
         dividerDecoration?.let { removeItemDecoration(it) }
         dividerDecoration = GridDividerItemDecoration(spanCount, dividerSize, dividerColor)
         addItemDecoration(dividerDecoration!!)
         val flat = mutableListOf<TableCell>()
-        if (orientationMode == VERTICAL) {
-            data.forEach { row ->
-                repeat(spanCount) { i -> flat.add(row.getOrNull(i) ?: TableCell("")) }
-            }
-        } else {
-            for (i in 0 until spanCount) data.forEach { row ->
+        data.forEach { row ->
+            repeat(spanCount) { i ->
                 flat.add(row.getOrNull(i) ?: TableCell(""))
             }
         }
@@ -103,7 +102,10 @@ class DoraTableView @JvmOverloads constructor(
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
             val tv = TextView(parent.context).apply {
-                layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
+                layoutParams = LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
                 gravity = Gravity.CENTER
             }
             return VH(tv)
@@ -148,7 +150,7 @@ class DoraTableView @JvmOverloads constructor(
             outRect: Rect,
             view: View,
             parent: RecyclerView,
-            state: RecyclerView.State
+            state: State
         ) {
             val position = (view.layoutParams as LayoutParams).viewAdapterPosition
             val column = position % spanCount
@@ -157,25 +159,35 @@ class DoraTableView @JvmOverloads constructor(
             outRect.bottom = dividerSize
         }
 
-        override fun onDraw(canvas: Canvas, parent: RecyclerView, state: RecyclerView.State) {
+        override fun onDraw(canvas: Canvas, parent: RecyclerView, state: State) {
             val childCount = parent.childCount
             for (i in 0 until childCount) {
                 val child = parent.getChildAt(i)
                 val params = child.layoutParams as LayoutParams
+
+                val position = parent.getChildAdapterPosition(child)
+                val column = position % spanCount
+                val row = position / spanCount
+                val totalRow = (parent.adapter?.itemCount ?: 0 + spanCount - 1) / spanCount
 
                 // 画竖线（右边）
                 val leftV = child.right + params.rightMargin
                 val rightV = leftV + dividerSize
                 val topV = child.top - params.topMargin
                 val bottomV = child.bottom + params.bottomMargin + dividerSize
-                canvas.drawRect(leftV.toFloat(), topV.toFloat(), rightV.toFloat(), bottomV.toFloat(), paint)
-
+                // 如果不是最后一列，画右边
+                if (column < spanCount - 1) {
+                    canvas.drawRect(leftV.toFloat(), topV.toFloat(), rightV.toFloat(), bottomV.toFloat(), paint)
+                }
                 // 画横线（下边）
                 val leftH = child.left - params.leftMargin
                 val rightH = child.right + params.rightMargin + dividerSize
                 val topH = child.bottom + params.bottomMargin
                 val bottomH = topH + dividerSize
-                canvas.drawRect(leftH.toFloat(), topH.toFloat(), rightH.toFloat(), bottomH.toFloat(), paint)
+                // 如果不是最后一行，画下边
+                if (row < totalRow - 1) {
+                    canvas.drawRect(leftH.toFloat(), topH.toFloat(), rightH.toFloat(), bottomH.toFloat(), paint)
+                }
             }
         }
     }
