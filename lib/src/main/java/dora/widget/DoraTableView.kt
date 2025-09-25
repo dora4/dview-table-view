@@ -64,8 +64,7 @@ class DoraTableView @JvmOverloads constructor(
         } else {
             data.maxOfOrNull { it.size } ?: 1  // 不论横向竖向，spanCount 始终是一行多少列
         }
-        layoutManager = GridLayoutManager(context, spanCount,
-            if (orientationMode == VERTICAL) HORIZONTAL else VERTICAL, false)
+        layoutManager = GridLayoutManager(context, spanCount, orientationMode, false)
         dividerDecoration?.let { removeItemDecoration(it) }
         dividerDecoration = GridDividerItemDecoration(spanCount, dividerSize, dividerColor)
         addItemDecoration(dividerDecoration!!)
@@ -105,13 +104,13 @@ class DoraTableView @JvmOverloads constructor(
             val tv = TextView(parent.context).apply {
                 layoutParams = if (orientationMode == VERTICAL) {
                     LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT
                     )
                 } else {
                     LayoutParams(
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
                     )
                 }
                 gravity = Gravity.CENTER
