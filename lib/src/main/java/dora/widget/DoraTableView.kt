@@ -64,7 +64,8 @@ class DoraTableView @JvmOverloads constructor(
         } else {
             data.maxOfOrNull { it.size } ?: 1  // 不论横向竖向，spanCount 始终是一行多少列
         }
-        layoutManager = GridLayoutManager(context, spanCount, orientationMode, false)
+        layoutManager = GridLayoutManager(context, spanCount,
+            if (orientationMode == VERTICAL) HORIZONTAL else VERTICAL, false)
         dividerDecoration?.let { removeItemDecoration(it) }
         dividerDecoration = GridDividerItemDecoration(spanCount, dividerSize, dividerColor)
         addItemDecoration(dividerDecoration!!)
@@ -102,10 +103,17 @@ class DoraTableView @JvmOverloads constructor(
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
             val tv = TextView(parent.context).apply {
-                layoutParams = LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                )
+                layoutParams = if (orientationMode == VERTICAL) {
+                    LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                    )
+                } else {
+                    LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                    )
+                }
                 gravity = Gravity.CENTER
             }
             return VH(tv)
@@ -130,6 +138,7 @@ class DoraTableView @JvmOverloads constructor(
             }
             val pad = (cell.paddingDp * holder.tv.resources.displayMetrics.density).toInt()
             holder.tv.setPadding(pad, pad, pad, pad)
+            holder.tv.setBackgroundColor(cell.backgroundColor)
         }
 
         inner class VH(val tv: TextView) : ViewHolder(tv)
@@ -154,7 +163,6 @@ class DoraTableView @JvmOverloads constructor(
         ) {
             val position = (view.layoutParams as LayoutParams).viewAdapterPosition
             val column = position % spanCount
-            // 只给右边和下边留出分割线空间
             outRect.right = if (column < spanCount - 1) dividerSize else 0
             outRect.bottom = dividerSize
         }
@@ -164,30 +172,37 @@ class DoraTableView @JvmOverloads constructor(
             for (i in 0 until childCount) {
                 val child = parent.getChildAt(i)
                 val params = child.layoutParams as LayoutParams
-
                 val position = parent.getChildAdapterPosition(child)
                 val column = position % spanCount
                 val row = position / spanCount
-                val totalRow = (parent.adapter?.itemCount ?: 0 + spanCount - 1) / spanCount
-
-                // 画竖线（右边）
+                // -------- 左边线（第一列要画）
+                if (column == 0) {
+                    val left = child.left - params.leftMargin - dividerSize
+                    val right = left + dividerSize
+                    val top = child.top - params.topMargin
+                    val bottom = child.bottom + params.bottomMargin + dividerSize
+                    canvas.drawRect(left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat(), paint)
+                }
+                // -------- 上边线（第一行要画）
+                if (row == 0) {
+                    val left = child.left - params.leftMargin
+                    val right = child.right + params.rightMargin + dividerSize
+                    val top = child.top - params.topMargin - dividerSize
+                    val bottom = top + dividerSize
+                    canvas.drawRect(left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat(), paint)
+                }
+                // -------- 右边线（所有列都画，最后一列就是外边框）
                 val leftV = child.right + params.rightMargin
                 val rightV = leftV + dividerSize
                 val topV = child.top - params.topMargin
                 val bottomV = child.bottom + params.bottomMargin + dividerSize
-                // 如果不是最后一列，画右边
-                if (column < spanCount - 1) {
-                    canvas.drawRect(leftV.toFloat(), topV.toFloat(), rightV.toFloat(), bottomV.toFloat(), paint)
-                }
-                // 画横线（下边）
+                canvas.drawRect(leftV.toFloat(), topV.toFloat(), rightV.toFloat(), bottomV.toFloat(), paint)
+                // -------- 下边线（所有行都画，最后一行就是外边框）
                 val leftH = child.left - params.leftMargin
                 val rightH = child.right + params.rightMargin + dividerSize
                 val topH = child.bottom + params.bottomMargin
                 val bottomH = topH + dividerSize
-                // 如果不是最后一行，画下边
-                if (row < totalRow - 1) {
-                    canvas.drawRect(leftH.toFloat(), topH.toFloat(), rightH.toFloat(), bottomH.toFloat(), paint)
-                }
+                canvas.drawRect(leftH.toFloat(), topH.toFloat(), rightH.toFloat(), bottomH.toFloat(), paint)
             }
         }
     }
