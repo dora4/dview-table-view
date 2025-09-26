@@ -155,194 +155,64 @@ class DoraTableView @JvmOverloads constructor(
             state: State
         ) {
             val position = (view.layoutParams as LayoutParams).viewAdapterPosition
-            if (position == NO_POSITION) return
-            val layoutManager = parent.layoutManager as? GridLayoutManager ?: return
-
-            if (layoutManager.orientation == VERTICAL) {
-                // 纵向模式：每个格子右和下留空
-                val column = position % spanCount
-                outRect.right = if (column < spanCount - 1) dividerSize else 0
-                outRect.bottom = dividerSize
+            if (position == RecyclerView.NO_POSITION) return
+            val column = position % spanCount
+            val row = position / spanCount
+            // 第一列要预留左边
+            if (column == 0) {
+                outRect.left = dividerSize
             } else {
-                // 横向模式：每个格子下和右留空
-                val row = position % spanCount
-                outRect.bottom = if (row < spanCount - 1) dividerSize else 0
-                outRect.right = dividerSize
+                outRect.left = 0
             }
+            // 第一行要预留上边
+            if (row == 0) {
+                outRect.top = dividerSize
+            } else {
+                outRect.top = 0
+            }
+            // 所有 item 都要预留右边和下边
+            outRect.right = dividerSize
+            outRect.bottom = dividerSize
         }
 
         override fun onDraw(canvas: Canvas, parent: RecyclerView, state: State) {
-            val layoutManager = parent.layoutManager as? GridLayoutManager ?: return
-            val orientation = layoutManager.orientation
             val childCount = parent.childCount
-            val itemCount = parent.adapter?.itemCount ?: 0
-            val totalLineCount = if (itemCount % spanCount == 0) {
-                itemCount / spanCount
-            } else {
-                itemCount / spanCount + 1
-            }
-
             for (i in 0 until childCount) {
                 val child = parent.getChildAt(i)
                 val params = child.layoutParams as LayoutParams
+
                 val position = parent.getChildAdapterPosition(child)
-                if (position == NO_POSITION) continue
-
                 val column = position % spanCount
-                val line = position / spanCount
+                val row = position / spanCount
 
-                if (orientation == VERTICAL) {
-                    // ===== 外边框 =====
-                    // 左边框（第一列）
-                    if (column == 0) {
-                        val left = child.left - params.leftMargin - dividerSize
-                        val right = left + dividerSize
-                        canvas.drawRect(
-                            left.toFloat(),
-                            (child.top - params.topMargin).toFloat(),
-                            right.toFloat(),
-                            (child.bottom + params.bottomMargin + dividerSize).toFloat(),
-                            paint
-                        )
-                    }
-                    // 上边框（第一行）
-                    if (line == 0) {
-                        val top = child.top - params.topMargin - dividerSize
-                        val bottom = top + dividerSize
-                        canvas.drawRect(
-                            (child.left - params.leftMargin).toFloat(),
-                            top.toFloat(),
-                            (child.right + params.rightMargin + dividerSize).toFloat(),
-                            bottom.toFloat(),
-                            paint
-                        )
-                    }
-                    // 右边框（最后一列）
-                    if (column == spanCount - 1 || position == itemCount - 1) {
-                        val left = child.right + params.rightMargin
-                        val right = left + dividerSize
-                        canvas.drawRect(
-                            left.toFloat(),
-                            (child.top - params.topMargin).toFloat(),
-                            right.toFloat(),
-                            (child.bottom + params.bottomMargin + dividerSize).toFloat(),
-                            paint
-                        )
-                    }
-                    // 下边框（最后一行）
-                    if (line == totalLineCount - 1) {
-                        val top = child.bottom + params.bottomMargin
-                        val bottom = top + dividerSize
-                        canvas.drawRect(
-                            (child.left - params.leftMargin).toFloat(),
-                            top.toFloat(),
-                            (child.right + params.rightMargin + dividerSize).toFloat(),
-                            bottom.toFloat(),
-                            paint
-                        )
-                    }
+                // 画竖线（右边）
+                val leftV = child.right + params.rightMargin
+                val rightV = leftV + dividerSize
+                val topV = child.top - params.topMargin
+                val bottomV = child.bottom + params.bottomMargin + dividerSize
+                canvas.drawRect(leftV.toFloat(), topV.toFloat(), rightV.toFloat(), bottomV.toFloat(), paint)
 
-                    // ===== 内部分割线 =====
-                    // 右边分割线（不是最后一列）
-                    if (column < spanCount - 1 && position < itemCount - 1) {
-                        val left = child.right + params.rightMargin
-                        val right = left + dividerSize
-                        canvas.drawRect(
-                            left.toFloat(),
-                            (child.top - params.topMargin).toFloat(),
-                            right.toFloat(),
-                            (child.bottom + params.bottomMargin + dividerSize).toFloat(),
-                            paint
-                        )
-                    }
-                    // 下边分割线（不是最后一行）
-                    if (line < totalLineCount - 1) {
-                        val top = child.bottom + params.bottomMargin
-                        val bottom = top + dividerSize
-                        canvas.drawRect(
-                            (child.left - params.leftMargin).toFloat(),
-                            top.toFloat(),
-                            (child.right + params.rightMargin + dividerSize).toFloat(),
-                            bottom.toFloat(),
-                            paint
-                        )
-                    }
-                } else {
-                    // ===== 横向模式 =====
-                    // 左边框（第一行 → 横向主轴是列，所以 line=0 表示最左）
-                    if (line == 0) {
-                        val left = child.left - params.leftMargin - dividerSize
-                        val right = left + dividerSize
-                        canvas.drawRect(
-                            left.toFloat(),
-                            (child.top - params.topMargin).toFloat(),
-                            right.toFloat(),
-                            (child.bottom + params.bottomMargin + dividerSize).toFloat(),
-                            paint
-                        )
-                    }
-                    // 上边框（第一列 → 横向时 column=0 表示最上）
-                    if (column == 0) {
-                        val top = child.top - params.topMargin - dividerSize
-                        val bottom = top + dividerSize
-                        canvas.drawRect(
-                            (child.left - params.leftMargin).toFloat(),
-                            top.toFloat(),
-                            (child.right + params.rightMargin + dividerSize).toFloat(),
-                            bottom.toFloat(),
-                            paint
-                        )
-                    }
-                    // 右边框（最后一行）
-                    if (line == totalLineCount - 1) {
-                        val left = child.right + params.rightMargin
-                        val right = left + dividerSize
-                        canvas.drawRect(
-                            left.toFloat(),
-                            (child.top - params.topMargin).toFloat(),
-                            right.toFloat(),
-                            (child.bottom + params.bottomMargin + dividerSize).toFloat(),
-                            paint
-                        )
-                    }
-                    // 下边框（最后一列）
-                    if (column == spanCount - 1 || position == itemCount - 1) {
-                        val top = child.bottom + params.bottomMargin
-                        val bottom = top + dividerSize
-                        canvas.drawRect(
-                            (child.left - params.leftMargin).toFloat(),
-                            top.toFloat(),
-                            (child.right + params.rightMargin + dividerSize).toFloat(),
-                            bottom.toFloat(),
-                            paint
-                        )
-                    }
+                // 画第一根竖线
+                if (column == 0) {
+                    canvas.drawRect(0f, topV.toFloat(), dividerSize.toFloat(), bottomV.toFloat(), paint)
+                }
 
-                    // ===== 内部分割线 =====
-                    // 右边分割线（不是最后一行）
-                    if (line < totalLineCount - 1 && position < itemCount - 1) {
-                        val left = child.right + params.rightMargin
-                        val right = left + dividerSize
-                        canvas.drawRect(
-                            left.toFloat(),
-                            (child.top - params.topMargin).toFloat(),
-                            right.toFloat(),
-                            (child.bottom + params.bottomMargin + dividerSize).toFloat(),
-                            paint
-                        )
-                    }
-                    // 下边分割线（不是最后一列）
-                    if (column < spanCount - 1) {
-                        val top = child.bottom + params.bottomMargin
-                        val bottom = top + dividerSize
-                        canvas.drawRect(
-                            (child.left - params.leftMargin).toFloat(),
-                            top.toFloat(),
-                            (child.right + params.rightMargin + dividerSize).toFloat(),
-                            bottom.toFloat(),
-                            paint
-                        )
-                    }
+                // 画横线（下边）
+                val leftH = child.left - params.leftMargin
+                val rightH = child.right + params.rightMargin + dividerSize
+                val topH = child.bottom + params.bottomMargin
+                val bottomH = topH + dividerSize
+                canvas.drawRect(leftH.toFloat(), topH.toFloat(), rightH.toFloat(), bottomH.toFloat(), paint)
+
+                // 画第一根横线
+                if (row == 0) {
+                    canvas.drawRect(
+                        leftH.toFloat(),
+                        0f,
+                        rightH.toFloat(),
+                        dividerSize.toFloat(),
+                        paint
+                    )
                 }
             }
         }
