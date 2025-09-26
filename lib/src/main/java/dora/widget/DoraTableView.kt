@@ -31,8 +31,7 @@ class DoraTableView @JvmOverloads constructor(
     private var dividerColor: Int = 0xFFE0E0E0.toInt()
     private var dividerSize: Int = 1
     private var dividerDecoration: ItemDecoration? = null
-
-    private val tableAdapter = TableAdapter()
+    private var tableAdapter: TableAdapter
 
     init {
         attrs?.let {
@@ -49,6 +48,7 @@ class DoraTableView @JvmOverloads constructor(
             )
             ta.recycle()
         }
+        tableAdapter = TableAdapter()
         adapter = tableAdapter
         setHasFixedSize(true)
     }
