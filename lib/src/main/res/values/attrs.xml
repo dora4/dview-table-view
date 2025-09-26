@@ -2,10 +2,10 @@
 
 <resources>
     <declare-styleable name="DoraTableView">
-        <!-- 1 = 垂直滚动（默认），0 = 水平滚动 -->
+        <!-- 0 = 垂直滚动（默认），1 = 水平滚动 -->
         <attr name="dview_tv_orientation" format="enum">
-            <enum name="horizontal" value="0"/>
-            <enum name="vertical" value="1"/>
+            <enum name="vertical" value="0"/>
+            <enum name="horizontal" value="1"/>
         </attr>
         <attr name="dview_tv_spanCount" format="integer"/>
         <attr name="dview_tv_dividerColor" format="color"/>
