@@ -31,7 +31,7 @@ class DoraTableView @JvmOverloads constructor(
     private var dividerColor: Int = 0xFFE0E0E0.toInt()
     private var dividerSize: Int = 1
     private var dividerDecoration: ItemDecoration? = null
-    private var tableAdapter: TableAdapter
+    private var tableAdapter = TableAdapter()
 
     init {
         attrs?.let {
@@ -48,7 +48,6 @@ class DoraTableView @JvmOverloads constructor(
             )
             ta.recycle()
         }
-        tableAdapter = TableAdapter()
         adapter = tableAdapter
         setHasFixedSize(true)
     }
@@ -64,7 +63,8 @@ class DoraTableView @JvmOverloads constructor(
         } else {
             data.maxOfOrNull { it.size } ?: 1  // 不论横向竖向，spanCount 始终是一行多少列
         }
-        layoutManager = GridLayoutManager(context, spanCount, orientationMode, false)
+        layoutManager = GridLayoutManager(context, spanCount, if (orientationMode == HORIZONTAL)
+            VERTICAL else HORIZONTAL, false)
         dividerDecoration?.let { removeItemDecoration(it) }
         dividerDecoration = GridDividerItemDecoration(spanCount, dividerSize, dividerColor)
         addItemDecoration(dividerDecoration!!)
@@ -102,17 +102,10 @@ class DoraTableView @JvmOverloads constructor(
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
             val tv = TextView(parent.context).apply {
-                layoutParams = if (orientationMode == VERTICAL) {
-                    LayoutParams(
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT
-                    )
-                } else {
-                    LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT
-                    )
-                }
+                layoutParams = LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
                 gravity = Gravity.CENTER
             }
             return VH(tv)
