@@ -8,7 +8,18 @@
             <enum name="horizontal" value="1"/>
         </attr>
         <attr name="dview_tv_spanCount" format="integer"/>
-        <attr name="dview_tv_dividerColor" format="color"/>
-        <attr name="dview_tv_dividerSize" format="dimension"/>
+        <attr name="dview_tv_dividerColor" format="color|reference"/>
+        <attr name="dview_tv_dividerSize" format="dimension|reference"/>
+    </declare-styleable>
+
+    <declare-styleable name="DoraScrollTableView">
+        <attr name="dview_stv_headerBorderColor" format="color|reference"/>
+        <attr name="dview_stv_headerBackgroundColor" format="color|reference"/>
+        <attr name="dview_stv_dataBorderColor" format="color|reference"/>
+        <attr name="dview_stv_dataBackgroundColor" format="color|reference"/>
+        <attr name="dview_stv_radius" format="integer"/>
+        <attr name="dview_stv_padding" format="integer"/>
+        <attr name="dview_stv_headersOnTop" format="boolean"/>
+        <attr name="dview_stv_scrollingEnabled" format="boolean"/>
     </declare-styleable>
 </resources>
